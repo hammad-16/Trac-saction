@@ -13,6 +13,14 @@ class PartiesPages extends StatefulWidget {
 }
 
 class _PartiesPagesState extends State<PartiesPages> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchName = '';
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,6 +88,7 @@ class _PartiesPagesState extends State<PartiesPages> {
                         onTap: (){},
                         child: Padding(padding: const EdgeInsets.symmetric(vertical: 8)
                       , child: Row(
+
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.bar_chart,
@@ -98,13 +107,89 @@ class _PartiesPagesState extends State<PartiesPages> {
                           ),
 
                         ),
-                      )
+                      ),
+
 
                     ],
                   ),
                 )
               ],
 
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.0001),
+                  blurRadius: 2,
+                  offset: const Offset(0,1),
+                )
+              ]
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                    child:  Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search,
+                              color: Colors.blue[700],
+                              size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                              child: TextField(
+                                controller: _searchController ,
+                                decoration: const InputDecoration(
+                                  hintText: 'Search Customer',
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true
+                                ),
+                                onChanged: (value){
+                                  setState(() {
+                                    _searchName = value;
+                                  });
+                                },
+
+                              )
+                          ),
+
+                        ],
+                      ),
+                    )
+                ),
+                const SizedBox(width:12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical:8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.filter_list, color:Colors.blue[700], size: 18,),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Filters',
+                        style: TextStyle(
+                          color: Colors.blue[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
           Expanded(child: Center(
