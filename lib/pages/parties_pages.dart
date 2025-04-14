@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:khatabook/main.dart';
+import 'package:khatabook/services/contact_picker_service.dart';
 import 'package:khatabook/widgets/build_qr_col.dart';
 import 'package:khatabook/widgets/build_stat_column.dart';
+import 'package:khatabook/widgets/contact_list.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/khata_provider.dart';
 import '../widgets/build_tab.dart';
 
 class PartiesPages extends StatefulWidget {
@@ -15,14 +20,95 @@ class PartiesPages extends StatefulWidget {
 class _PartiesPagesState extends State<PartiesPages> {
   final TextEditingController _searchController = TextEditingController();
   String _searchName = '';
+  bool _isCustomerTab =true;
+  bool _isLoading = false;
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
+  void onSearch(String value)
+  {
+    final provider = Provider.of<KhataBookProvider>(context, listen: false);
+    provider.searchCustomers(value);
+  }
+  Future<void> _pickContact() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try{
 
+      final contact = await ContactPickerService.pickContact();
+      if(contact != null && mounted)
+        {
+          contact.type = _isCustomerTab ? 'customer' : 'supplier';
+          final provider = Provider.of<KhataBookProvider>(context, listen: false);
+          if(_isCustomerTab)
+            {
+              await provider.addCustomer(contact);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Customer added successfully'),
+                  backgroundColor: Colors.green,
+                ),
+
+              );
+              await provider.loadCustomers();
+            }
+          else
+            {
+              await provider.addSupplier(contact);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Supplier added successfully'),
+                  backgroundColor: Colors.green,
+                )
+              );
+              await provider.loadSuppliers();
+            }
+        }
+    }
+    catch(e)
+    {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error Adding contact'),
+          backgroundColor: Colors.red,
+        )
+      );
+    }
+    finally{
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _changeTab(bool isCustomers)
+  {
+    if(_isCustomerTab != isCustomers)
+      {
+        setState(() {
+          _isCustomerTab = isCustomers;
+          _searchController.clear();
+        });
+        if(_isCustomerTab)
+          {
+            Provider.of<KhataBookProvider>(context,listen: false).loadCustomers();
+          }
+        else
+          {
+            Provider.of<KhataBookProvider>(context, listen: false).loadSuppliers();
+
+          }
+      }
+  }
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<KhataBookProvider>(context);
+    final stats = provider.stats;
+    final contacts = _isCustomerTab ? provider.customers : provider.suppliers;
     return Scaffold(
       body: Column(
         children: [
@@ -33,9 +119,15 @@ class _PartiesPagesState extends State<PartiesPages> {
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
-                      buildTab('CUSTOMERS', true),
+                      GestureDetector(
+                        onTap: ()=> _changeTab(true),
+                          child: buildTab('CUSTOMERS', _isCustomerTab),
+                      ),
                       const SizedBox(width:16),
-                      buildTab('SUPPLIERS', false),
+                      GestureDetector(
+                          onTap: ()=> _changeTab(false),
+                          child: buildTab('SUPPLIERS', !_isCustomerTab)
+                      ),
                     ],
                   ),
                 ),
@@ -149,17 +241,13 @@ class _PartiesPagesState extends State<PartiesPages> {
                           Expanded(
                               child: TextField(
                                 controller: _searchController ,
-                                decoration: const InputDecoration(
-                                  hintText: 'Search Customer',
+                                decoration: InputDecoration(
+                                  hintText: _isCustomerTab?'Search Customer':'Search Supplier',
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
                                   isDense: true
                                 ),
-                                onChanged: (value){
-                                  setState(() {
-                                    _searchName = value;
-                                  });
-                                },
+                                onChanged: onSearch,
 
                               )
                           ),
@@ -192,19 +280,37 @@ class _PartiesPagesState extends State<PartiesPages> {
               ],
             ),
           ),
-          Expanded(child: Center(
+          Expanded(child:
+              contacts.isEmpty?
+          Center(
             child: Text('Customer list will appear here'),
+          ):
+            ListView.builder(
+                itemCount: contacts.length,
+                itemBuilder: (context,ind){
+                  final contact = contacts[ind];
+
+                  return ContactListItem(contact: contact, amount: 0);
+                }),
           ),
-          ),
-          Padding(padding: const EdgeInsets.only(left:180, bottom: 30),
+          Padding(padding: const EdgeInsets.only(left:130, bottom: 30,right: 22),
           child: SizedBox(
             width: double.infinity,
             height: 56,
-            child: ElevatedButton.icon(onPressed: (){},
-                label: const Text('ADD CUSTOMER'),
-              icon: Icon(Icons.person_add),
+            child: ElevatedButton.icon(onPressed: _isLoading? null : _pickContact,
+                label: Text(_isCustomerTab?'ADD CUSTOMER':'ADD SUPPLIER',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              icon: _isLoading? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              ): Icon(Icons.person_add),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFC2185B),
+                backgroundColor: _isCustomerTab? Color(0xFFC2185B): Colors.green,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28)

@@ -82,6 +82,16 @@ class DatabaseHelper {
     );
     return List.generate(maps.length, (i) => Contact.fromMap(maps[i]));
   }
+  Future<List<Contact>> searchContacts(String query, String type) async{
+    final db = await database;
+    final maps = await db.query(
+      'contacts',
+      where: 'name LIKE ? AND type = ?',
+      whereArgs: ['%$query%', type],
+      orderBy: 'name ASC',
+    );
+    return List.generate(maps.length, (it) => Contact.fromMap(maps[it]));
+  }
 
   Future<int> updateContact(Contact contact) async {
     final db = await database;

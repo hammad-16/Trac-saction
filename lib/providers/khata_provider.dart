@@ -10,6 +10,7 @@ class KhataBookProvider extends ChangeNotifier{
 
   List <Contact> _customers = [];
   List <Contact> _suppliers = [];
+  List<Contact> _filteredCustomers = [];
 
   CustomerStats _stats = CustomerStats(willGive: 0, willGet: 0, qrCollections: 0);
 
@@ -76,6 +77,18 @@ class KhataBookProvider extends ChangeNotifier{
 
   Future<List<AppTransaction>> getDailyPassbook(DateTime date) async {
     return await _databaseHelper.getTransactionsByDate(date);
+  }
+
+  Future<void> searchCustomers(String query) async{
+      if(query.isEmpty)
+        {
+          _filteredCustomers =[];
+        }
+      else
+        {
+          _filteredCustomers = await _databaseHelper.searchContacts(query,'customer');
+        }
+      notifyListeners();
   }
 
 

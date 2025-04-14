@@ -3,20 +3,22 @@ import 'package:khatabook/pages/bills_page.dart';
 import 'package:khatabook/pages/items_page.dart';
 import 'package:khatabook/pages/more_page.dart';
 import 'package:khatabook/pages/parties_pages.dart';
+import 'package:khatabook/providers/khata_provider.dart';
 import 'package:khatabook/widgets/bottom_drawer.dart';
 import 'package:provider/provider.dart';
 void main() {
   runApp(
-    // MultiProvider(
-    //     providers:[
-    //       // ChangeNotifierProvider(create: (_) => PartyProvider()),
-    //       // ChangeNotifierProvider(create: (_) => BillProvider()),
-    //       // ChangeNotifierProvider(create: (_) => ItemProvider()),
-    //     ],
-    //   child: const KhataBook(),
-    //
-    // )
-    KhataBook()
+    MultiProvider(
+        providers:[
+          ChangeNotifierProvider(create: (_) => KhataBookProvider())
+          // ChangeNotifierProvider(create: (_) => PartyProvider()),
+          // ChangeNotifierProvider(create: (_) => BillProvider()),
+          // ChangeNotifierProvider(create: (_) => ItemProvider()),
+        ],
+      child: const KhataBook(),
+
+    ),
+
   );
 }
 
