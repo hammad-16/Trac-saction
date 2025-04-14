@@ -172,6 +172,9 @@ class DatabaseHelper {
   Future<Map<String, double>> getOverallStats() async {
     final db = await database;
 
+    final allTransactions = await db.query('transactions');
+    print("All transactions: $allTransactions");
+
     // Total amount to give (all suppliers)
     final totalGiveResult = await db.rawQuery(
         '''SELECT SUM(t.amount) as total 

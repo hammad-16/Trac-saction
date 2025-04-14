@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:khatabook/pages/transaction_page.dart';
+import 'package:provider/provider.dart';
 
 import '../data/models/contact.dart';
+import '../providers/khata_provider.dart';
 
 class ContactListItem extends StatelessWidget {
   final Contact contact;
   final double amount;
-  const ContactListItem({Key? key, required this.contact, required this.amount}) : super(key: key);
+  final String balanceType;
+  final VoidCallback? onTap;
+  const ContactListItem({
+    Key? key,
+    required this.contact,
+    required this.amount,
+    required this.balanceType,
+    this.onTap}) : super(key: key);
 
   //Helper function to get the initials
   String _getInitials() {
@@ -36,10 +45,13 @@ class ContactListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
+      onTap: onTap?? (){
         Navigator.push(context, MaterialPageRoute(
-            builder: (context) => TransactionPage(contact: contact,)
-        ));
+            builder: (context) => TransactionPage(contact: contact),
+        )
+        ).then((_){
+          Provider.of<KhataBookProvider>(context, listen: false).loadContactBalances();
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),

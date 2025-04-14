@@ -85,6 +85,14 @@ class _PartiesPagesState extends State<PartiesPages> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      Provider.of<KhataBookProvider>(context, listen: false).loadData();
+    });
+
+  }
   void _changeTab(bool isCustomers)
   {
     if(_isCustomerTab != isCustomers)
@@ -109,6 +117,8 @@ class _PartiesPagesState extends State<PartiesPages> {
     final provider = Provider.of<KhataBookProvider>(context);
     final stats = provider.stats;
     final contacts = _isCustomerTab ? provider.customers : provider.suppliers;
+    final contactBalances = provider.contactBalances;
+
     return Scaffold(
       body: Column(
         children: [
@@ -289,8 +299,31 @@ class _PartiesPagesState extends State<PartiesPages> {
                 itemCount: contacts.length,
                 itemBuilder: (context,ind){
                   final contact = contacts[ind];
+                  double amount = 0;
+                  String balanceType = '';
+                  if(contact.id != null && contactBalances.containsKey(contact.id))
+                    {
+                      final balance = contactBalances[contact.id]!;
 
-                  return ContactListItem(contact: contact, amount: 0);
+                      if(_isCustomerTab){
+                        amount = balance['balance'] ?? 0;
+                        balanceType = amount >= 0 ? 'get' : 'give';
+                        amount = amount.abs();
+                      }
+                      else
+                        {
+                          amount = balance['balance'] ?? 0;
+                          balanceType = amount >= 0 ? 'give' : 'get';
+                          amount = amount.abs();
+                        }
+                    }
+
+                  return ContactListItem(
+                    contact: contact,
+                    amount: amount,
+                    balanceType: balanceType,
+
+                  );
                 }),
           ),
           Padding(padding: const EdgeInsets.only(left:130, bottom: 30,right: 22),
