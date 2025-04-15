@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:khatabook/providers/khata_provider.dart';
+import 'package:khatabook/services/pdf_service.dart';
 import 'package:khatabook/widgets/build_action_button.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,6 +34,8 @@ class _TransactionPageState extends State<TransactionPage> {
     _loadTransactions();
 
   }
+
+
 
   Future<void> _loadTransactions() async {
     setState(() {
@@ -71,6 +74,34 @@ class _TransactionPageState extends State<TransactionPage> {
     }
   }
 
+  Future <void> _generatePdfReport() async{
+    try{
+      setState(() {
+        _isLoading = true;
+      });
+      await PdfService.generateContactTransactionsPdf(
+          widget.contact,
+          _transactions,
+          _balanceType == 'get' ? _totalBalance : 0.0,
+          _balanceType == 'get' ? _totalBalance : 0.0
+      );
+    }
+    catch(e)
+    {
+      print('Error generating pdf: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error generating PDF: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    finally{
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
   Future<void> _addTransaction(String type) async {
     final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
@@ -104,7 +135,7 @@ class _TransactionPageState extends State<TransactionPage> {
         );
 
         await provider.addTransaction(newTransaction);
-        await _loadTransactions(); // Refresh transactions
+        await _loadTransactions();
         await provider.loadStats();
 
       } catch (e) {
@@ -256,8 +287,9 @@ class _TransactionPageState extends State<TransactionPage> {
                 icon: Icons.picture_as_pdf,
                 label: 'Report',
                 color: Colors.blue[800]!,
-                onTap: () {
+                onTap: () async{
 
+                 _generatePdfReport();
                 }
               ),
               buildActionButton(

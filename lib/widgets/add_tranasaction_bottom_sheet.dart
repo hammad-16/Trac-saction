@@ -106,7 +106,10 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('CANCEL'),
+                  child: const Text('CANCEL',
+                  style: TextStyle(
+                    color: Colors.black
+                  ),),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -125,8 +128,10 @@ class _AddTransactionBottomSheetState extends State<AddTransactionBottomSheet> {
                     ),
                   ),
                   child: Text(
+
                     isGave ? 'SAVE DEBIT' : 'SAVE CREDIT',
                     style: const TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

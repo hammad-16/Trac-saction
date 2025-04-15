@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:khatabook/pages/bills_page.dart';
-import 'package:khatabook/pages/items_page.dart';
 import 'package:khatabook/pages/more_page.dart';
 import 'package:khatabook/pages/parties_pages.dart';
 import 'package:khatabook/providers/khata_provider.dart';
@@ -34,8 +32,6 @@ class _KhataBookState extends State<KhataBook> {
 
    final List<Widget> _pages =[
      PartiesPages(),
-     BillsPage(),
-     ItemsPage(),
      MorePage(),
    ];
 
@@ -50,7 +46,7 @@ class _KhataBookState extends State<KhataBook> {
       ),
 
       home: Scaffold(
-        appBar: _curIndex < 4?AppBar(
+        appBar: AppBar(
           backgroundColor: Color(0xFF0D47A1),
           title: GestureDetector(
             child: Row(
@@ -70,7 +66,7 @@ class _KhataBookState extends State<KhataBook> {
               
             },
           ),
-        ):AppBar(),
+        ),
         body: IndexedStack(
           index: _curIndex,
           children: _pages,
@@ -86,8 +82,6 @@ class _KhataBookState extends State<KhataBook> {
           unselectedItemColor: Colors.grey,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Parties'),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Bills'),
-            BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Items'),
             BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'More')
           ],
         ),

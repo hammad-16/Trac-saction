@@ -115,6 +115,11 @@ class KhataBookProvider extends ChangeNotifier{
   Future<List<AppTransaction>> getDailyPassbook(DateTime date) async {
     return await _databaseHelper.getTransactionsByDate(date);
   }
+  Future<List<AppTransaction>> getOverallPassbook() async {
+    return await _databaseHelper.getAllTransactions();
+  }
+
+
 
   Future<void> searchCustomers(String query) async{
       if(query.isEmpty)

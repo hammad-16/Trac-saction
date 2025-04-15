@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:khatabook/main.dart';
+import 'package:khatabook/pages/passbook.dart';
 import 'package:khatabook/services/contact_picker_service.dart';
 import 'package:khatabook/widgets/build_qr_col.dart';
 import 'package:khatabook/widgets/build_stat_column.dart';
@@ -160,7 +161,7 @@ class _PartiesPagesState extends State<PartiesPages> {
                         child: Row(
                           children: [
                             Expanded(
-                                child: buildStatColumn('You will give', '₹ 0')
+                                child: buildStatColumn('You will give', '₹${stats.willGive}')
                             ),
                             Container(
                               height: 40,
@@ -168,7 +169,7 @@ class _PartiesPagesState extends State<PartiesPages> {
                               color: Colors.grey.withOpacity(0.3),
                             ),
                             Expanded(
-                                child: buildStatColumn('You will get', '₹ 0')
+                                child: buildStatColumn('You will get', '₹${stats.willGet}')
                             ),
                             Container(
                               height: 40,
@@ -187,7 +188,11 @@ class _PartiesPagesState extends State<PartiesPages> {
                       ),
 
                       InkWell(
-                        onTap: (){},
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => Passbook(),
+                          ));
+                        },
                         child: Padding(padding: const EdgeInsets.symmetric(vertical: 8)
                       , child: Row(
 

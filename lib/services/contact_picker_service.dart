@@ -11,7 +11,7 @@ class ContactPickerService {
 
   // Open contact picker and return selected contact
   static Future<app_contact.Contact?> pickContact() async {
-    // First check if we have permission
+
     if (!await requestPermission()) {
       return null;
     }
@@ -20,7 +20,7 @@ class ContactPickerService {
       // Open the contact picker
       final contact = await FlutterContacts.openExternalPick();
 
-      // If user didn't select a contact, return null
+
       if (contact == null) {
         return null;
       }

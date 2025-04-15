@@ -180,7 +180,7 @@ class DatabaseHelper {
         '''SELECT SUM(t.amount) as total 
        FROM transactions t
        JOIN contacts c ON t.contact_id = c.id
-       WHERE t.type = 'debit' AND c.type = 'supplier'
+       WHERE t.type = 'debit' 
     ''');
 
     // Total amount to get (all customers)
@@ -188,7 +188,7 @@ class DatabaseHelper {
         '''SELECT SUM(t.amount) as total 
        FROM transactions t
        JOIN contacts c ON t.contact_id = c.id
-       WHERE t.type = 'credit' AND c.type = 'customer'
+       WHERE t.type = 'credit' 
     ''');
 
     // QR collections (could be a separate table or calculated differently)
@@ -207,6 +207,16 @@ class DatabaseHelper {
       'willGet': totalGet,
       'qrCollections': qrCollections,
     };
+  }
+
+  Future<List<AppTransaction>> getAllTransactions() async {
+    final db = await database;
+    final maps = await db.query(
+      'transactions',
+      orderBy: 'date DESC', // Sort by latest date
+    );
+
+    return List.generate(maps.length, (i) => AppTransaction.fromMap(maps[i]));
   }
 
 }
