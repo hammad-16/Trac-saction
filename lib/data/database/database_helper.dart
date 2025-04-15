@@ -173,7 +173,7 @@ class DatabaseHelper {
     final db = await database;
 
     final allTransactions = await db.query('transactions');
-    print("All transactions: $allTransactions");
+    //print("All transactions: $allTransactions");
 
     // Total amount to give (all suppliers)
     final totalGiveResult = await db.rawQuery(

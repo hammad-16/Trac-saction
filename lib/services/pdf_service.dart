@@ -57,7 +57,7 @@ class PdfService {
         await OpenFile.open(output.path);
       }
     } catch (e) {
-      print('Error generating PDF: $e');
+      //print('Error generating PDF: $e');
       // You might want to re-throw or handle this error
       rethrow;
     }

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:khatabook/main.dart';
 import 'package:khatabook/pages/passbook.dart';
 import 'package:khatabook/services/contact_picker_service.dart';
 import 'package:khatabook/widgets/build_qr_col.dart';
@@ -20,7 +18,6 @@ class PartiesPages extends StatefulWidget {
 
 class _PartiesPagesState extends State<PartiesPages> {
   final TextEditingController _searchController = TextEditingController();
-  String _searchName = '';
   bool _isCustomerTab =true;
   bool _isLoading = false;
   @override
@@ -71,7 +68,7 @@ class _PartiesPagesState extends State<PartiesPages> {
     }
     catch(e)
     {
-      print(e);
+      //print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Error Adding contact'),

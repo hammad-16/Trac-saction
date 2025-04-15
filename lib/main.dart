@@ -2,21 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:khatabook/pages/more_page.dart';
 import 'package:khatabook/pages/parties_pages.dart';
 import 'package:khatabook/providers/khata_provider.dart';
-import 'package:khatabook/widgets/bottom_drawer.dart';
+import 'package:khatabook/services/business_name.dart';
 import 'package:provider/provider.dart';
 void main() {
   runApp(
     MultiProvider(
         providers:[
           ChangeNotifierProvider(create: (_) => KhataBookProvider())
-          // ChangeNotifierProvider(create: (_) => PartyProvider()),
-          // ChangeNotifierProvider(create: (_) => BillProvider()),
-          // ChangeNotifierProvider(create: (_) => ItemProvider()),
         ],
       child: const KhataBook(),
-
     ),
-
   );
 }
 
@@ -37,6 +32,7 @@ class _KhataBookState extends State<KhataBook> {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'KhataBook',
       debugShowCheckedModeBanner: false,
@@ -53,7 +49,7 @@ class _KhataBookState extends State<KhataBook> {
               spacing: 5,
               children: [
                 const Icon(Icons.book_outlined, color: Colors.white,),
-                const Text("My Business",
+                 Text(BusinessName.name,
                 style: TextStyle(
                     fontSize: 18,
                   color: Colors.white
@@ -63,7 +59,7 @@ class _KhataBookState extends State<KhataBook> {
               ],
             ),
             onTap: (){
-              
+
             },
           ),
         ),

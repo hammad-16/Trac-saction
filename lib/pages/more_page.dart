@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:khatabook/pages/passbook.dart';
+import 'package:khatabook/pages/settings_page.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -9,17 +10,17 @@ class MorePage extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          InkWell(
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) => Passbook(),
-              )
-              );
-            },
-            child: Row(
-              spacing: 60,
-              children: [
-                Card(
+          Row(
+            spacing: 60,
+            children: [
+              InkWell(
+                onTap: (){
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) => Passbook(),
+      )
+      );
+                },
+                child: Card(
                   color: Colors.white,
                   elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)
@@ -50,7 +51,15 @@ class MorePage extends StatelessWidget {
                   ),
                   ),
                   ),
-                Card(
+              ),
+              InkWell(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => SettingsPage(),
+                  )
+                  );
+                },
+                child: Card(
                   color: Colors.white,
                   elevation: 4,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)
@@ -71,7 +80,7 @@ class MorePage extends StatelessWidget {
                         ),
                         SizedBox(height: 12,),
                         Text(
-                          'Cashbook',
+                          'Settings',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -81,8 +90,8 @@ class MorePage extends StatelessWidget {
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           )
         ],
       ),
