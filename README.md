@@ -1,15 +1,4 @@
-# Khatabook
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)v# KhataBook - Personal Finance Tracker
+#KhataBook - Personal Finance Tracker
 
 KhataBook is a comprehensive financial transaction tracking application built with Flutter. It allows users to manage customers and suppliers, track credit and debit transactions, and generate detailed transaction reports in PDF format.
 
