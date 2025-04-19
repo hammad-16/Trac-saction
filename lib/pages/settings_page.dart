@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:khatabook/main.dart';
 import 'package:khatabook/services/business_name.dart';
-
+import 'package:provider/provider.dart';
+import'package:khatabook/providers/khata_provider.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -10,14 +11,30 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final TextEditingController _nameController = TextEditingController();
+  late TextEditingController _nameController;
   final FocusNode _focusNode = FocusNode();
 
   bool _showTextField = false;
   String typedName = '';
 
+
+  @override
+  void initState() {
+    super.initState();
+    final provider = Provider.of<KhataBookProvider>(context, listen: false);
+    _nameController = TextEditingController(text: provider.name);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<KhataBookProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D47A1),
@@ -26,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Column(
         children: [
-          Container(
+          SizedBox(
             height: 62,
             width: 360,
             child: Card(
@@ -48,7 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         _showTextField = true;
                       });
 
-                      // Focus after UI builds
+
                       Future.delayed(const Duration(milliseconds: 100), () {
                         FocusScope.of(context).requestFocus(_focusNode);
                       });
@@ -69,7 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 focusNode: _focusNode,
                 onChanged: (value) {
                   setState(() {
-                    BusinessName.name = value;
+                    Provider.of<KhataBookProvider>(context, listen: false).setName(value);
                   });
                 },
                 decoration: const InputDecoration(

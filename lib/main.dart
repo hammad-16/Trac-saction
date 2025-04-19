@@ -32,7 +32,7 @@ class _KhataBookState extends State<KhataBook> {
 
   @override
   Widget build(BuildContext context) {
-
+ final  provider = Provider.of<KhataBookProvider>(context);
     return MaterialApp(
       title: 'KhataBook',
       debugShowCheckedModeBanner: false,
@@ -49,7 +49,7 @@ class _KhataBookState extends State<KhataBook> {
               spacing: 5,
               children: [
                 const Icon(Icons.book_outlined, color: Colors.white,),
-                 Text(BusinessName.name,
+                 Text(provider.name,
                 style: TextStyle(
                     fontSize: 18,
                   color: Colors.white

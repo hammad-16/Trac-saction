@@ -45,6 +45,7 @@ dependencies:
   pdf: ^3.11.3
   open_file: ^3.5.10
   flutter_file_dialog: ^3.0.2
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

@@ -3,7 +3,8 @@ import 'package:khatabook/data/database/database_helper.dart';
 import 'package:khatabook/data/models/contact.dart';
 import 'package:khatabook/data/models/customer_stats.dart';
 import 'package:khatabook/data/models/transaction.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class KhataBookProvider extends ChangeNotifier{
   final DatabaseHelper _databaseHelper = DatabaseHelper();
@@ -22,6 +23,27 @@ class KhataBookProvider extends ChangeNotifier{
   CustomerStats get stats => _stats;
   Map<int, Map<String, double>> get contactBalances => _contactBalances;
 
+
+  String _name = 'My Business';
+  String get name => _name;
+
+  KhataBookProvider(){
+    _loadName();
+  }
+
+  void setName(String value) async {
+    _name = value;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('business_name', value);
+  }
+
+  void _loadName() async {
+    final prefs = await SharedPreferences.getInstance();
+    _name = prefs.getString('business_name') ?? '';
+    notifyListeners();
+  }
 
     Future<void> loadCustomers() async{
       _customers = await _databaseHelper.getContacts('customer');

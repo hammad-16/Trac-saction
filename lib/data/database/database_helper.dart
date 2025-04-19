@@ -53,6 +53,41 @@ class DatabaseHelper {
         FOREIGN KEY (contact_id) REFERENCES contacts (id) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute('''
+  CREATE TABLE Item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    imagePath TEXT,
+    primaryUnit TEXT NOT NULL,
+    secondaryUnit TEXT,
+    conversionRate REAL,
+    salePrice REAL NOT NULL,
+    purchasePrice REAL,
+    taxIncluded INTEGER NOT NULL,
+    openingStock REAL,
+    lowStockAlert REAL,
+    asOfDate TEXT NOT NULL,
+    hsnCode TEXT,
+    gstRate REAL,
+    createdAt TEXT NOT NULL
+  )
+''');
+
+    await db.execute('''
+  CREATE TABLE InventoryTransaction (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    itemId INTEGER NOT NULL,
+    quantity REAL NOT NULL,
+    type TEXT NOT NULL,
+    relatedTransactionId INTEGER,
+    notes TEXT,
+    date TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    FOREIGN KEY (itemId) REFERENCES Item(id) ON DELETE CASCADE
+  )
+''');
+
   }
   Future<int> insertContact(Contact contact) async {
     final db = await database;
