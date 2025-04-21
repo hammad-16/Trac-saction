@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:khatabook/pages/inventory.dart';
 import 'package:khatabook/pages/passbook.dart';
 import 'package:khatabook/pages/settings_page.dart';
 import 'package:khatabook/pages/staff.dart';
@@ -56,7 +57,7 @@ class MorePage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SettingsPage()),
+                    MaterialPageRoute(builder: (context) => Inventory()),
                   );
                 },
               ),

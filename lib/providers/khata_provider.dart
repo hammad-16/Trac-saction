@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:khatabook/data/database/database_helper.dart';
 import 'package:khatabook/data/models/contact.dart';
 import 'package:khatabook/data/models/customer_stats.dart';
+import 'package:khatabook/data/models/inventory_transaction.dart';
 import 'package:khatabook/data/models/transaction.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../data/models/item.dart';
 
 
 class KhataBookProvider extends ChangeNotifier{
@@ -14,6 +17,8 @@ class KhataBookProvider extends ChangeNotifier{
   List <Contact> _customers = [];
   List <Contact> _suppliers = [];
   List<Contact> _filteredCustomers = [];
+  List<Item> _items = [];
+  List<Item> _filteredItems = [];
 
 
   CustomerStats _stats = CustomerStats(willGive: 0, willGet: 0, qrCollections: 0);
@@ -22,7 +27,7 @@ class KhataBookProvider extends ChangeNotifier{
   List<Contact> get suppliers => _suppliers;
   CustomerStats get stats => _stats;
   Map<int, Map<String, double>> get contactBalances => _contactBalances;
-
+  List<Item> get items => _filteredItems.isNotEmpty ? _filteredItems : _items;
 
   String _name = 'My Business';
   String get name => _name;
@@ -164,4 +169,51 @@ class KhataBookProvider extends ChangeNotifier{
   }
 
 
+  //Providers related to Inventory Management
+
+
+  Future<void> loadItems() async{
+    _items = await _databaseHelper.getItems();
+    notifyListeners();
+  }
+
+  Future <void> addItems(Item item) async
+  {
+    final id = await _databaseHelper.insertItem(item);
+    item.id = id;
+    _items.add(item);
+    notifyListeners();
+  }
+
+  Future <void> updateItem(Item item) async{
+    await _databaseHelper.updateItem(item);
+    final index = _items.indexWhere((i) => i.id == item.id);
+    if (index != -1) {
+      _items[index] = item;
+      notifyListeners();
+    }
+  }
+  Future <void> deleteItem(int id) async{
+    await _databaseHelper.deleteItem(id);
+    _items.removeWhere((item) => item.id == id);
+    notifyListeners();
+  }
+  Future <void> searchItems(String query) async{
+    if(query.isEmpty){
+      _filteredItems = [];
+    }
+    else{
+      _filteredItems = _items.where((item)=>
+      item.name.toLowerCase().contains(query.toLowerCase())
+      ).toList();
+    }
+    notifyListeners();
+  }
+  Future <void> addInventoryTransactions(InventoryTransaction transaction)async{
+    await _databaseHelper.insertInventoryTransaction(transaction);
+    notifyListeners();
+  }
+  Future<double> getCurrentStock(int itemId) async {
+    return await _databaseHelper.getCurrentStock(itemId);
+  }
 }

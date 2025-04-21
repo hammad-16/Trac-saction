@@ -3,6 +3,8 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/contact.dart';
+import '../models/inventory_transaction.dart';
+import '../models/item.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -53,7 +55,7 @@ class DatabaseHelper {
         FOREIGN KEY (contact_id) REFERENCES contacts (id) ON DELETE CASCADE
       )
     ''');
-
+    //This is  item table creation
     await db.execute('''
   CREATE TABLE Item (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -252,6 +254,158 @@ class DatabaseHelper {
     );
 
     return List.generate(maps.length, (i) => AppTransaction.fromMap(maps[i]));
+  }
+
+  //Item CRUD operations
+
+Future<int> insertItem(Item item)async{
+    final db = await database;
+    return await db.insert('items', item.toMap());
+}
+
+Future<Item?> getItem(int id) async{
+    final db = await database;
+    final maps = await db.query(
+      'items',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if(maps.isNotEmpty)
+      {
+        return Item.fromMap(maps.first);
+      }
+    return null;
+}
+
+  Future<List<Item>>getItems() async{
+    final db = await database;
+    final maps = await db.query(
+      'items',
+      orderBy: 'name ASC',
+    );
+    return List.generate(maps.length, (i) => Item.fromMap(maps[i]));
+  }
+
+  Future <List<Item>> searchItems(String query) async{
+    final db = await database;
+    final maps = await db.query(
+      'items',
+      where: 'names LIKE ?',
+      whereArgs: ['%$query%'],
+      orderBy: 'name ASC',
+    );
+    return List.generate(maps.length, (i) => Item.fromMap(maps[i]));
+
+  }
+
+  Future <int> updateItem(Item item) async{
+    final db = await database;
+    return await db.update('items',
+        item.toMap(),
+        where: 'id = ?',
+        whereArgs: [item.id]
+    );
+  }
+
+  Future <int> deleteItem(int id) async{
+    final db = await database;
+    return await db.delete(
+      'items',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
+  //Inventory transactions
+
+  Future<int> insertInventoryTransaction(InventoryTransaction transaction) async {
+    final db = await database;
+    return await db.insert('inventory_transactions', transaction.toMap());
+  }
+
+  Future<List<InventoryTransaction>> getInventoryTransactionsForItem(int itemId) async {
+    final db = await database;
+    final maps = await db.query(
+      'inventory_transactions',
+      where: 'item_id = ?',
+      whereArgs: [itemId],
+      orderBy: 'date DESC',
+    );
+    return List.generate(maps.length, (i) => InventoryTransaction.fromMap(maps[i]));
+  }
+
+  Future<double> getCurrentStock(int itemId) async {
+    final db = await database;
+
+    // Get the opening stock
+    final itemResult = await db.query(
+      'items',
+      columns: ['opening_stock'],
+      where: 'id = ?',
+      whereArgs: [itemId],
+    );
+
+    double openingStock = 0.0;
+    if (itemResult.isNotEmpty) {
+      openingStock = itemResult.first['opening_stock'] as double? ?? 0.0;
+    }
+    // Get all inventory transactions for this item
+    final transactionResults = await db.rawQuery('''
+      SELECT type, SUM(quantity) as total
+      FROM inventory_transactions
+      WHERE item_id = ?
+      GROUP BY type
+    ''', [itemId]);
+
+    double currentStock = openingStock;
+
+    for (final result in transactionResults) {
+      final type = result['type'] as String;
+      final total = result['total'] as double? ?? 0.0;
+
+      if (type == 'purchase') {
+        currentStock += total;
+      } else if (type == 'sale') {
+        currentStock -= total;
+      } else if (type == 'adjustment') {
+        // For adjustments, the quantity can be positive or negative
+        currentStock += total;
+      }
+    }
+
+    return currentStock;
+  }
+  Future<Map<String, dynamic>> getItemStats(int itemId) async {
+    final db = await database;
+
+    // Total purchases
+    final purchasesResult = await db.rawQuery('''
+      SELECT SUM(quantity) as total
+      FROM inventory_transactions
+      WHERE item_id = ? AND type = 'purchase'
+    ''', [itemId]);
+
+    // Total sales
+    final salesResult = await db.rawQuery('''
+      SELECT SUM(quantity) as total
+      FROM inventory_transactions
+      WHERE item_id = ? AND type = 'sale'
+    ''', [itemId]);
+
+    // Current stock
+    final currentStock = await getCurrentStock(itemId);
+
+    // Get item details for valuation
+    final item = await getItem(itemId);
+
+    return {
+      'purchases': purchasesResult.first['total'] as double? ?? 0.0,
+      'sales': salesResult.first['total'] as double? ?? 0.0,
+      'currentStock': currentStock,
+      'stockValue': currentStock * (item?.purchasePrice ?? 0.0),
+      'potentialSaleValue': currentStock * (item?.salePrice ?? 0.0),
+    };
   }
 
 }
