@@ -1,4 +1,4 @@
-### KhataBook - Personal Finance Tracker
+### Trac-saction - Personal Finance Tracker
 
 KhataBook is a comprehensive financial transaction tracking application built with Flutter. It allows users to manage customers and suppliers, track credit and debit transactions, and generate detailed transaction reports in PDF format.
 
