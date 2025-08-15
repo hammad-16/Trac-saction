@@ -158,7 +158,7 @@ class _PartiesPagesState extends State<PartiesPages> {
                         child: Row(
                           children: [
                             Expanded(
-                                child: buildStatColumn('You will give', '₹${stats.willGive}')
+                                child: buildStatColumn('Total Sent', '₹${stats.willGive}')
                             ),
                             Container(
                               height: 40,
@@ -166,7 +166,7 @@ class _PartiesPagesState extends State<PartiesPages> {
                               color: Colors.grey.withOpacity(0.3),
                             ),
                             Expanded(
-                                child: buildStatColumn('You will get', '₹${stats.willGet}')
+                                child: buildStatColumn('Total Received', '₹${stats.willGet}')
                             ),
                             Container(
                               height: 40,

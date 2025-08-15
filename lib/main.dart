@@ -1,18 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:khatabook/pages/auth_gate.dart';
+import 'package:khatabook/pages/login_screen.dart';
 import 'package:khatabook/pages/more_page.dart';
 import 'package:khatabook/pages/parties_pages.dart';
 import 'package:khatabook/providers/khata_provider.dart';
-import 'package:khatabook/services/business_name.dart';
 import 'package:provider/provider.dart';
-void main() {
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     MultiProvider(
         providers:[
           ChangeNotifierProvider(create: (_) => KhataBookProvider())
         ],
-      child: const KhataBook(),
+      child: const MyApp(),
     ),
   );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tracsaction',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+          primarySwatch: Colors.indigo,
+          scaffoldBackgroundColor: Colors.white
+      ),
+      home: const AuthGate(),
+    );
+  }
 }
 
 class KhataBook extends StatefulWidget {
@@ -46,7 +70,7 @@ class _KhataBookState extends State<KhataBook> {
           backgroundColor: Color(0xFF0D47A1),
           title: GestureDetector(
             child: Row(
-              spacing: 5,
+
               children: [
                 const Icon(Icons.book_outlined, color: Colors.white,),
                  Text(provider.name,
