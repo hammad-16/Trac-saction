@@ -1,5 +1,8 @@
+import 'package:uuid/uuid.dart';
+
 class Item{
   int? id;
+  final String firebaseId;
   String name;
   String? imagePath;
   String primaryUnit;
@@ -17,6 +20,7 @@ class Item{
 
   Item({
    this.id,
+    String?firebaseId,
    required this.name,
     this.imagePath,
     required this.primaryUnit,
@@ -31,11 +35,12 @@ class Item{
     this.hsnCode,
     this.gstRate,
     required this.createdAt
-});
+}): this.firebaseId = firebaseId ?? Uuid().v4();
 
 Map<String, dynamic> toMap() {
   return {
     'id': id,
+    'firebaseId': firebaseId,
     'name': name,
     'imagePath': imagePath,
     'primaryUnit': primaryUnit,
@@ -56,6 +61,7 @@ Map<String, dynamic> toMap() {
 factory Item.fromMap(Map<String, dynamic> map) {
 return Item(
 id: map['id'],
+firebaseId: map['firebaseId'],
 name: map['name'],
 imagePath: map['imagePath'],
 primaryUnit: map['primaryUnit'],

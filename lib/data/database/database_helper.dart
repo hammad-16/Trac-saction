@@ -5,10 +5,13 @@ import 'package:sqflite/sqflite.dart';
 import '../models/contact.dart';
 import '../models/inventory_transaction.dart';
 import '../models/item.dart';
+import 'package:khatabook/data/database/firestore_helper.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
+  final FirebaseHelper _firebaseHelper = FirebaseHelper();
+
 
   factory DatabaseHelper() => _instance;
   DatabaseHelper._internal();
@@ -34,6 +37,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE contacts(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        firebaseId TEXT NOT NULL,
         name TEXT NOT NULL,
         phone TEXT,
         type TEXT NOT NULL,    -- 'customer' or 'supplier'
@@ -46,6 +50,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE transactions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        firebaseId TEXT NOT NULL,
         contact_id INTEGER NOT NULL,
         amount REAL NOT NULL,
         type TEXT NOT NULL,    -- 'credit' (you'll get) or 'debit' (you'll give)
@@ -57,8 +62,9 @@ class DatabaseHelper {
     ''');
     //This is  item table creation
     await db.execute('''
-  CREATE TABLE Item (
+  CREATE TABLE items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    firebaseId TEXT NOT NULL,
     name TEXT NOT NULL,
     imagePath TEXT,
     primaryUnit TEXT NOT NULL,
@@ -86,14 +92,21 @@ class DatabaseHelper {
     notes TEXT,
     date TEXT NOT NULL,
     createdAt TEXT NOT NULL,
-    FOREIGN KEY (itemId) REFERENCES Item(id) ON DELETE CASCADE
+    FOREIGN KEY (itemId) REFERENCES items(id) ON DELETE CASCADE
   )
 ''');
 
   }
   Future<int> insertContact(Contact contact) async {
     final db = await database;
-    return await db.insert('contacts', contact.toMap());
+    final localId = await db.insert('contacts', contact.toMap());
+    try {
+      await _firebaseHelper.addContact(contact);
+    }
+    catch(e){
+      print("Failed to Sync contact to Firestore");
+    }
+    return localId;
   }
 
   Future<Contact?> getContact(int id) async {
@@ -132,27 +145,57 @@ class DatabaseHelper {
 
   Future<int> updateContact(Contact contact) async {
     final db = await database;
-    return await db.update(
-      'contacts',
-      contact.toMap(),
-      where: 'id = ?',
-      whereArgs: [contact.id],
+    final rowsAffected = await db.update(
+        'contacts',
+        contact.toMap(),
+        where: 'id = ?',
+        whereArgs: [contact.id]
     );
+    try {
+      await _firebaseHelper.updateContact(contact);
+    } catch (e) {
+      print("Failed to sync contact to Firestore: $e");
+    }
+    return rowsAffected;
+
   }
 
   Future<int> deleteContact(int id) async {
     final db = await database;
-    return await db.delete(
-      'contacts',
-      where: 'id = ?',
-      whereArgs: [id],
+    final contactMap = await db.query(
+        'contacts',
+        where: 'id = ?',
+        whereArgs: [id]
     );
+    final contact = contactMap.isNotEmpty ?
+    Contact.fromMap(contactMap.first)
+    : null;
+
+    final rowsAffected = await db.delete(
+        'contacts',
+        where: 'id = ?',
+        whereArgs: [id]
+    );
+    if (contact != null) {
+      try {
+        await _firebaseHelper.deleteContact(contact.firebaseId);
+      } catch (e) {
+        print("Failed to sync contact deletion to Firestore: $e");
+      }
+    }
+    return rowsAffected;
   }
 
 // Transaction operations
   Future<int> insertTransaction(AppTransaction txn) async {
     final db = await database;
-    return await db.insert('transactions', txn.toMap());
+    final localId = await db.insert('transactions', txn.toMap());
+    try {
+      await _firebaseHelper.addTransaction(txn);
+    } catch (e) {
+      print("Failed to sync transaction to Firestore: $e");
+    }
+    return localId;
   }
 
   Future<List<AppTransaction>> getTransactionsForContact(int contactId) async {
@@ -259,8 +302,14 @@ class DatabaseHelper {
   //Item CRUD operations
 
 Future<int> insertItem(Item item)async{
-    final db = await database;
-    return await db.insert('items', item.toMap());
+  final db = await database;
+  final localId = await db.insert('items', item.toMap());
+  try {
+    await _firebaseHelper.addItem(item);
+  } catch (e) {
+    print("Failed to sync item to Firestore: $e");
+  }
+  return localId;
 }
 
 Future<Item?> getItem(int id) async{
@@ -290,7 +339,7 @@ Future<Item?> getItem(int id) async{
     final db = await database;
     final maps = await db.query(
       'items',
-      where: 'names LIKE ?',
+      where: 'name LIKE ?',
       whereArgs: ['%$query%'],
       orderBy: 'name ASC',
     );
@@ -300,20 +349,28 @@ Future<Item?> getItem(int id) async{
 
   Future <int> updateItem(Item item) async{
     final db = await database;
-    return await db.update('items',
-        item.toMap(),
-        where: 'id = ?',
-        whereArgs: [item.id]
-    );
+    final rowsAffected = await db.update('items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+    try {
+      await _firebaseHelper.updateItem(item);
+    } catch (e) {
+      print("Failed to sync item to Firestore: $e");
+    }
+    return rowsAffected;
   }
 
   Future <int> deleteItem(int id) async{
     final db = await database;
-    return await db.delete(
-      'items',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    final itemMap = await db.query('items', where: 'id = ?', whereArgs: [id]);
+    final item = itemMap.isNotEmpty ? Item.fromMap(itemMap.first) : null;
+    final rowsAffected = await db.delete('items', where: 'id = ?', whereArgs: [id]);
+    if (item != null) {
+      try {
+        await _firebaseHelper.deleteItem(item.firebaseId);
+      } catch (e) {
+        print("Failed to sync item deletion to Firestore: $e");
+      }
+    }
+    return rowsAffected;
   }
 
 
@@ -321,7 +378,14 @@ Future<Item?> getItem(int id) async{
 
   Future<int> insertInventoryTransaction(InventoryTransaction transaction) async {
     final db = await database;
-    return await db.insert('inventory_transactions', transaction.toMap());
+    final localId = db.insert('inventory_transactions', transaction.toMap());
+    try{
+      await _firebaseHelper.addInventoryTransaction(transaction);
+    }
+    catch(e){
+      print("Failed to sync inventory transaction to Firestore: $e");
+    }
+    return localId;
   }
 
   Future<List<InventoryTransaction>> getInventoryTransactionsForItem(int itemId) async {

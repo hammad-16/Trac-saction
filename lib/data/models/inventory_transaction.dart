@@ -1,5 +1,8 @@
+import 'package:uuid/uuid.dart';
+
 class InventoryTransaction {
   int? id;
+  final String firebaseId;
   int itemId;
   double quantity;
   String type;
@@ -17,7 +20,8 @@ class InventoryTransaction {
     this.notes,
     required this.date,
     required this.createdAt,
-  });
+    String? firebaseId
+  }): this.firebaseId = firebaseId ?? Uuid().v4();
 
   Map<String, dynamic> toMap() {
     return {
