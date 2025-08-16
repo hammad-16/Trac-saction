@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:khatabook/data/database/database_helper.dart';
 import 'package:khatabook/data/models/contact.dart';
 
 import '../models/inventory_transaction.dart';
@@ -10,6 +11,7 @@ import '../models/transaction.dart';
 class FirebaseHelper{
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final _databaseHelper = DatabaseHelper();
 
   String? get uid => _auth.currentUser?.uid;
 
@@ -100,6 +102,127 @@ class FirebaseHelper{
     _checkAuth();
     await _userInventoryTransactionsCollection.doc(transaction.firebaseId).set(transaction.toMap());
   }
+
+  Future<void> syncFromFirestore() async{
+    _checkAuth();
+    final contactsQuery = await _userContactsCollection.get();
+    final transactionsQuery = await _userTransactionsCollection.get();
+    final itemsQuery = await _userItemsCollection.get();
+    final inventoryTransactionsQuery = await _userInventoryTransactionsCollection.get();
+
+    final db = DatabaseHelper();
+    for(var doc in contactsQuery.docs){
+      final contact = Contact.fromMap(doc.data() as Map<String, dynamic>);
+      await db.insertContactLocally(contact);
+    }
+
+    // Batch insert transactions
+    for (var doc in transactionsQuery.docs) {
+      final transaction = AppTransaction.fromMap(doc.data() as Map<String, dynamic>);
+      await db.insertTransactionLocally(transaction);
+    }
+
+    // Batch insert items
+    for (var doc in itemsQuery.docs) {
+      final item = Item.fromMap(doc.data() as Map<String, dynamic>);
+      await db.insertItemLocally(item);
+    }
+
+    // Batch insert inventory transactions
+    for (var doc in inventoryTransactionsQuery.docs) {
+      final invTransaction = InventoryTransaction.fromMap(doc.data() as Map<String, dynamic>);
+      await db.insertInventoryTransactionLocally(invTransaction);
+    }
+  }
+
+  //Listening for real-time contact changes
+  void startContactListener() {
+    _checkAuth();
+    _userContactsCollection.snapshots().listen((snapshot) {
+      for (var change in snapshot.docChanges) {
+        final contactMap = change.doc.data() as Map<String, dynamic>;
+        final contact = Contact.fromMap(contactMap);
+        switch (change.type) {
+          case DocumentChangeType.added:
+          // Insert or update locally if it doesn't exist
+            _databaseHelper.insertContactLocally(contact);
+            break;
+          case DocumentChangeType.modified:
+          // Update the local record
+            _databaseHelper.updateContactLocally(contact);
+            break;
+          case DocumentChangeType.removed:
+          // Hard delete the local record
+            _databaseHelper.hardDeleteContact(contact.id!);
+            break;
+        }
+      }
+    });
+  }
+
+  void startTransactionListener() {
+    _checkAuth();
+    _userTransactionsCollection.snapshots().listen((snapshot) {
+      for (var change in snapshot.docChanges) {
+        final transactionMap = change.doc.data() as Map<String, dynamic>;
+        final transaction = AppTransaction.fromMap(transactionMap);
+        switch (change.type) {
+          case DocumentChangeType.added:
+            _databaseHelper.insertTransactionLocally(transaction);
+            break;
+          case DocumentChangeType.modified:
+            _databaseHelper.updateTransactionLocally(transaction);
+            break;
+          case DocumentChangeType.removed:
+            _databaseHelper.deleteTransactionLocally(transaction.firebaseId);
+            break;
+        }
+      }
+    });
+  }
+
+  void startItemListener() {
+    _checkAuth();
+    _userItemsCollection.snapshots().listen((snapshot) {
+      for (var change in snapshot.docChanges) {
+        final itemMap = change.doc.data() as Map<String, dynamic>;
+        final item = Item.fromMap(itemMap);
+        switch (change.type) {
+          case DocumentChangeType.added:
+            _databaseHelper.insertItemLocally(item);
+            break;
+          case DocumentChangeType.modified:
+            _databaseHelper.updateItemLocally(item);
+            break;
+          case DocumentChangeType.removed:
+            _databaseHelper.deleteItemLocally(item.firebaseId);
+            break;
+        }
+      }
+    });
+  }
+
+  void startInventoryTransactionListener() {
+    _checkAuth();
+    _userInventoryTransactionsCollection.snapshots().listen((snapshot) {
+      for (var change in snapshot.docChanges) {
+        final invTxnMap = change.doc.data() as Map<String, dynamic>;
+        final invTxn = InventoryTransaction.fromMap(invTxnMap);
+        switch (change.type) {
+          case DocumentChangeType.added:
+            _databaseHelper.insertInventoryTransactionLocally(invTxn);
+            break;
+          case DocumentChangeType.modified:
+            _databaseHelper.updateInventoryTransactionLocally(invTxn);
+            break;
+          case DocumentChangeType.removed:
+            _databaseHelper.deleteInventoryTransactionLocally(invTxn.firebaseId);
+            break;
+        }
+      }
+    });
+  }
+
 }
 
 

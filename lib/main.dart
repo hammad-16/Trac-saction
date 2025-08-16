@@ -4,6 +4,7 @@ import 'package:khatabook/pages/login_screen.dart';
 import 'package:khatabook/pages/more_page.dart';
 import 'package:khatabook/pages/parties_pages.dart';
 import 'package:khatabook/providers/khata_provider.dart';
+import 'package:khatabook/services/connectivity_service.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,6 +13,8 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  final connectivityService = ConnectivityService();
+  connectivityService.startListening();
   runApp(
     MultiProvider(
         providers:[

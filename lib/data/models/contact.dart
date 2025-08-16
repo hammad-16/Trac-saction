@@ -8,6 +8,7 @@ class Contact {
   String type; // 'customer' or 'supplier'
   String? notes;
   DateTime createdAt;
+  final String status;
 
   Contact({
     this.id,
@@ -16,8 +17,32 @@ class Contact {
     required this.type,
     this.notes,
     required this.createdAt,
-     String? firebaseId
+     String? firebaseId,
+      this.status = 'synced'
   }) : this.firebaseId = firebaseId ?? Uuid().v4();
+
+  // Add this method
+  Contact copyWith({
+    int? id,
+    String? firebaseId,
+    String? name,
+    String? phone,
+    String? type,
+    String? notes,
+    String? createdAt,
+    String? status,
+  }) {
+    return Contact(
+      id: id ?? this.id,
+      firebaseId: firebaseId ?? this.firebaseId,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      type: type ?? this.type,
+      notes: notes ?? this.notes,
+      createdAt: this.createdAt,
+      status: status ?? this.status,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -28,6 +53,7 @@ class Contact {
       'type': type,
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
+      'status': status,
     };
   }
 
@@ -40,6 +66,7 @@ class Contact {
       type: map['type'],
       notes: map['notes'],
       createdAt: DateTime.parse(map['created_at']),
+      status: map['status'] ?? 'synced',
     );
   }
 }

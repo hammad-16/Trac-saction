@@ -17,7 +17,7 @@ class Item{
   String? hsnCode;
   double? gstRate;
   DateTime createdAt;
-
+  final String status;
   Item({
    this.id,
     String?firebaseId,
@@ -34,9 +34,49 @@ class Item{
     required this.asOfDate,
     this.hsnCode,
     this.gstRate,
-    required this.createdAt
+    required this.createdAt,
+    this.status = 'synced'
 }): this.firebaseId = firebaseId ?? Uuid().v4();
 
+  Item copyWith({
+    int? id,
+    String? firebaseId,
+    String? name,
+    String? imagePath,
+    String? primaryUnit,
+    String? secondaryUnit,
+    double? conversionRate,
+    double? salePrice,
+    double? purchasePrice,
+    int? taxIncluded,
+    double? openingStock,
+    double? lowStockAlert,
+    String? asOfDate,
+    String? hsnCode,
+    double? gstRate,
+    String? createdAt,
+    String? status,
+  }) {
+    return Item(
+      id: id ?? this.id,
+      firebaseId: firebaseId ?? this.firebaseId,
+      name: name ?? this.name,
+      imagePath: imagePath ?? this.imagePath,
+      primaryUnit: primaryUnit ?? this.primaryUnit,
+      secondaryUnit: secondaryUnit ?? this.secondaryUnit,
+      conversionRate: conversionRate ?? this.conversionRate,
+      salePrice: salePrice ?? this.salePrice,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
+      taxIncluded: this.taxIncluded,
+      openingStock: openingStock ?? this.openingStock,
+      lowStockAlert: lowStockAlert ?? this.lowStockAlert,
+      asOfDate: this.asOfDate,
+      hsnCode: hsnCode ?? this.hsnCode,
+      gstRate: gstRate ?? this.gstRate,
+      createdAt: this.createdAt,
+      status: status ?? this.status,
+    );
+  }
 Map<String, dynamic> toMap() {
   return {
     'id': id,
@@ -55,6 +95,7 @@ Map<String, dynamic> toMap() {
     'hsnCode': hsnCode,
     'gstRate': gstRate,
     'createdAt': createdAt.toIso8601String(),
+    'status': status,
   };
 }
 
@@ -76,6 +117,7 @@ asOfDate: DateTime.parse(map['asOfDate']),
 hsnCode: map['hsnCode'],
 gstRate: map['gstRate']?.toDouble(),
 createdAt: DateTime.parse(map['createdAt']),
+  status: map['status'] ?? 'synced',
 );
 }
 }
