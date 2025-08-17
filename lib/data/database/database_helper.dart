@@ -12,7 +12,7 @@ import 'package:khatabook/data/database/firestore_helper.dart';
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
-  final FirebaseHelper _firebaseHelper = FirebaseHelper();
+  late final FirebaseHelper _firebaseHelper = FirebaseHelper();
 
 
   factory DatabaseHelper() => _instance;
@@ -291,7 +291,7 @@ class DatabaseHelper {
         '''SELECT SUM(t.amount) as total 
        FROM transactions t
        JOIN contacts c ON t.contact_id = c.id
-       WHERE t.type = 'debit' AND t.status != 'deleted
+       WHERE t.type = 'debit' AND t.status != 'deleted'
     ''');
 
     // Total amount to get (all customers)
@@ -299,14 +299,14 @@ class DatabaseHelper {
         '''SELECT SUM(t.amount) as total 
        FROM transactions t
        JOIN contacts c ON t.contact_id = c.id
-       WHERE t.type = 'credit' AND t.status != 'deleted
+       WHERE t.type = 'credit' AND t.status != 'deleted'
     ''');
 
     // QR collections (could be a separate table or calculated differently)
     final qrResult = await db.rawQuery(
         '''SELECT SUM(t.amount) as total 
        FROM transactions t
-       WHERE t.type = 'credit' AND t.description LIKE '%QR%' AND t.status != 'deleted
+       WHERE t.type = 'credit' AND t.description LIKE '%QR%' AND t.status != 'deleted'
     ''');
 
     double totalGive = totalGiveResult.first['total'] as double? ?? 0.0;
@@ -358,8 +358,8 @@ Future<Item?> getItem(int id) async{
     final db = await database;
     final maps = await db.query(
       'items',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND status != ?',
+      whereArgs: [id, 'deleted'],
     );
     if(maps.isNotEmpty)
       {

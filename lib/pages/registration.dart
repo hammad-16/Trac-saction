@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:khatabook/auth/auth_service.dart';
+import 'package:khatabook/pages/login_screen.dart';
 import 'package:khatabook/widgets/loader.dart';
 
 class Registration extends StatefulWidget {
@@ -29,6 +30,10 @@ class _RegistrationState extends State<Registration> {
         emailController.text.trim(),
         passwordController.text.trim()
         );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!'))
+        );
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
       } on FirebaseAuthException catch(e){
         String message;
         if(e.code == 'email-already-in-use'){
@@ -47,7 +52,7 @@ class _RegistrationState extends State<Registration> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Oops! An unexpected error occured'))
         );
-        print('error $e');
+        print('error: $e');
       }
       finally{
         setState(() {
