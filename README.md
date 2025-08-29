@@ -6,7 +6,7 @@ KhataBook is a comprehensive financial transaction tracking application built wi
 
 - **Frontend Framework**: Flutter
 - **Programming Language**: Dart
-- **Database**: SQLite (using sqflite plugin)
+- **Database**: SQLite (using sqflite plugin), Firebase
 - **State Management**: Provider
 - **PDF Generation**: pdf package
 - **Contact Selection**: flutter_contacts
