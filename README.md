@@ -82,22 +82,6 @@ The application uses a SQLite database with two main tables:
 - date
 - created_at
 
-## Setup and Installation
-
-1. Clone the repository:
-git clone https://github.com/yourusername/khatabook.git
-
-2. Navigate to the project directory:
-cd khatabook
-
-3. Install dependencies:
-flutter pub get
-
-4. Ensure you have the proper file structure for Android file paths:
-android/app/src/main/res/xml/file_paths.xml
-
-5. Run the application:
-flutter run
 
 ## Screenshots
 
